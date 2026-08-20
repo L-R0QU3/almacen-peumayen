@@ -17,6 +17,15 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Lee la cotización + ítems usando el db indicado (pool o cliente transaccional). */
+async function readQuotation(db, id) {
+  await repo.expireExpired(db);
+  const quotation = await repo.findById(db, id);
+  if (!quotation) throw errors.notFound('Cotización no encontrada');
+  const items = await repo.findItems(db, id);
+  return { ...quotation, items };
+}
+
 export async function listQuotations(filters) {
   // Materialización perezosa de vencidas antes de listar
   await repo.expireExpired(pool);
@@ -24,11 +33,7 @@ export async function listQuotations(filters) {
 }
 
 export async function getQuotation(id) {
-  await repo.expireExpired(pool);
-  const quotation = await repo.findById(pool, id);
-  if (!quotation) throw errors.notFound('Cotización no encontrada');
-  const items = await repo.findItems(pool, id);
-  return { ...quotation, items };
+  return readQuotation(pool, id);
 }
 
 /**
@@ -169,7 +174,8 @@ export async function updateQuotation(id, { customerId, validUntil, observations
       }
     }
 
-    return getQuotation(id);
+    // Lectura DENTRO de la transacción: ve los cambios aún no commiteados
+    return readQuotation(client, id);
   });
 }
 

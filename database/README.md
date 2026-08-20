@@ -31,6 +31,7 @@ npm run migrate:down  # revertir la última
 | 0014 | quotation_items (snapshots) |
 | 0015 | índices |
 | 0016 | app_settings + app_is_admin() (Storage RLS) |
+| 0017 | `updated_at` en catálogos (categories/brands/units) |
 
 > El primer usuario ADMIN se crea con `npm run create-admin` en `backend/` (Supabase Auth),
 > no por SQL directo en `auth.users`.

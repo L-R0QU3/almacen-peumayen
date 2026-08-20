@@ -29,6 +29,26 @@ describe('Catálogos (categorías, marcas, unidades, proveedores)', () => {
     expect(res.body.error.code).toBe('DUPLICATE');
   });
 
+  it('actualiza un registro de catálogo', async () => {
+    const created = await api().post('/api/v1/units').set(auth(TOKEN_ADMIN))
+      .send({ name: `Unidad ${Date.now()}`, abbreviation: 'un' });
+    const id = created.body.data.id;
+
+    const up = await api().put(`/api/v1/units/${id}`).set(auth(TOKEN_ADMIN))
+      .send({ abbreviation: 'u' });
+    expect(up.status).toBe(200);
+    expect(up.body.data.abbreviation).toBe('u');
+    expect(up.body.data.name).toBe(created.body.data.name);
+  });
+
+  it('404 para catálogo inexistente', async () => {
+    const res = await api()
+      .put('/api/v1/units/00000000-0000-0000-0000-00000000dead')
+      .set(auth(TOKEN_ADMIN))
+      .send({ name: 'X' });
+    expect(res.status).toBe(404);
+  });
+
   it('desactiva en lugar de eliminar (soft delete)', async () => {
     const created = await api().post('/api/v1/brands').set(auth(TOKEN_ADMIN)).send({ name: `Marca ${Date.now()}` });
     const id = created.body.data.id;

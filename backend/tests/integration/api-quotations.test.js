@@ -106,6 +106,30 @@ describe('Cotizaciones', () => {
     expect(edit.body.error.code).toBe('INVALID_STATUS');
   });
 
+  it('actualiza una cotización en BORRADOR: reemplaza ítems, recalcula totales y mantiene el número', async () => {
+    const a = await createProduct({ sale_price: 1000 });
+    const b = await createProduct({ sale_price: 2000 });
+    const created = await api().post('/api/v1/quotations').set(auth(TOKEN_ADMIN))
+      .send(quotePayload([{ product_id: a.res.body.data.id, quantity: 2 }]));
+    const id = created.body.data.id;
+    expect(created.body.data.total).toBe(2000);
+    expect(created.body.data.items).toHaveLength(1);
+
+    const up = await api().put(`/api/v1/quotations/${id}`).set(auth(TOKEN_ADMIN)).send({
+      items: [
+        { product_id: a.res.body.data.id, quantity: 1 },
+        { product_id: b.res.body.data.id, quantity: 1 },
+      ],
+      observations: 'Actualizada',
+    });
+
+    expect(up.status).toBe(200);
+    expect(up.body.data.total).toBe(3000); // 1×1000 + 1×2000
+    expect(up.body.data.items).toHaveLength(2);
+    expect(up.body.data.observations).toBe('Actualizada');
+    expect(up.body.data.number).toBe(created.body.data.number); // la numeración no cambia
+  });
+
   it('valida transiciones de estado', async () => {
     const p = await createProduct();
     const created = await api().post('/api/v1/quotations').set(auth(TOKEN_ADMIN))
