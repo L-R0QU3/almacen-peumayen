@@ -9,7 +9,8 @@ export const loginController = ah(async (req, res) => {
 });
 
 export const logoutController = ah(async (req, res) => {
-  await logout(req.auth.userId);
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  await logout(token);
   return ok(res, { loggedOut: true });
 });
 

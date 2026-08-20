@@ -19,8 +19,8 @@ export async function login({ email, password }) {
   };
 }
 
-/** Revoca todas las sesiones del usuario (logout global vía service role). */
-export async function logout(userId) {
-  const { error } = await supabaseAdmin.auth.admin.signOut(userId);
+/** Revoca la sesión del usuario (logout vía service role, usando su access token JWT). */
+export async function logout(accessToken) {
+  const { error } = await supabaseAdmin.auth.admin.signOut(accessToken);
   if (error) throw errors.internal('No se pudo cerrar la sesión');
 }
