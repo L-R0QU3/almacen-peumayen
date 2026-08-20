@@ -1,5 +1,5 @@
 import { errors } from '../lib/errors.js';
-import { withTransaction } from '../db/transactions.js';
+import { withTransactionRetry } from '../db/transactions.js';
 import { pool } from '../db/pool.js';
 import * as repo from '../repositories/inventory.repo.js';
 
@@ -26,7 +26,7 @@ export async function registerMovement({ productId, movementType, quantity, unit
     );
   }
 
-  return withTransaction(async (client) => {
+  return withTransactionRetry(async (client) => {
     const product = await repo.lockProduct(client, productId);
     if (!product) throw errors.notFound('Producto no encontrado');
 
@@ -60,7 +60,7 @@ export async function registerMovement({ productId, movementType, quantity, unit
  * No permite stock negativo.
  */
 export async function adjustStock({ productId, newStock, notes = null, createdBy = null }) {
-  return withTransaction(async (client) => {
+  return withTransactionRetry(async (client) => {
     const product = await repo.lockProduct(client, productId);
     if (!product) throw errors.notFound('Producto no encontrado');
 

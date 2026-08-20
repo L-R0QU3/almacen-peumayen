@@ -1,5 +1,5 @@
-import { errors } from '../lib/errors.js';
-import { withTransaction } from '../db/transactions.js';
+﻿import { errors } from '../lib/errors.js';
+import { withTransactionRetry } from '../db/transactions.js';
 import { pool } from '../db/pool.js';
 import * as repo from '../repositories/quotations.repo.js';
 
@@ -41,7 +41,7 @@ export async function getQuotation(id) {
  * Numeración atómica por año (quotation_sequences + FOR UPDATE) y snapshots de precios.
  */
 export async function createQuotation({ customerId, validUntil, observations, items, createdBy }) {
-  return withTransaction(async (client) => {
+  return withTransactionRetry(async (client) => {
     const year = new Date().getFullYear();
     const number = await repo.nextSequenceNumber(client, year);
 
@@ -105,7 +105,7 @@ export async function createQuotation({ customerId, validUntil, observations, it
 
 /** Edición solo en BORRADOR. Re-snapshot de precios actuales. */
 export async function updateQuotation(id, { customerId, validUntil, observations, items }) {
-  return withTransaction(async (client) => {
+  return withTransactionRetry(async (client) => {
     const existing = await repo.lockById(client, id);
     if (!existing) throw errors.notFound('Cotización no encontrada');
     if (existing.status !== 'BORRADOR') {
@@ -186,7 +186,7 @@ export async function changeStatus(id, status, _userId) {
       'La conversión a venta requiere el módulo de ventas (fase futura)'
     );
   }
-  return withTransaction(async (client) => {
+  return withTransactionRetry(async (client) => {
     const existing = await repo.lockById(client, id);
     if (!existing) throw errors.notFound('Cotización no encontrada');
     if (!TRANSITIONS[existing.status]?.includes(status)) {
@@ -201,7 +201,7 @@ export async function changeStatus(id, status, _userId) {
 
 /** Eliminación física SOLO de borradores (nunca se publicaron; no hay valor histórico). */
 export async function deleteQuotation(id) {
-  return withTransaction(async (client) => {
+  return withTransactionRetry(async (client) => {
     const existing = await repo.lockById(client, id);
     if (!existing) throw errors.notFound('Cotización no encontrada');
     if (existing.status !== 'BORRADOR') {
@@ -213,3 +213,4 @@ export async function deleteQuotation(id) {
     return repo.deleteQuotation(client, id);
   });
 }
+
