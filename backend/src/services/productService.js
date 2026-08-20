@@ -10,11 +10,11 @@ export function calcMargin(purchasePrice, salePrice) {
 }
 
 export async function listProducts(filters) {
-  return repo.findMany(pool(), filters);
+  return repo.findMany(pool, filters);
 }
 
 export async function getProduct(id) {
-  const product = await repo.findById(pool(), id);
+  const product = await repo.findById(pool, id);
   if (!product) throw errors.notFound('Producto no encontrado');
   return product;
 }

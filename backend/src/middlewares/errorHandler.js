@@ -1,5 +1,4 @@
 import { AppError } from '../lib/errors.js';
-import { env } from '../config/env.js';
 
 /** Manejo central de errores. Nunca expone stack traces en producción. */
 // eslint-disable-next-line no-unused-vars
@@ -35,6 +34,13 @@ export function errorHandler(err, req, res, next) {
       error: { code: 'FK_VIOLATION', message: 'La operación viola una relación con otros registros' },
     });
   }
+  if (err.code === '23502') {
+    return res.status(400).json({
+      data: null,
+      meta: null,
+      error: { code: 'VALIDATION_ERROR', message: 'Faltan campos obligatorios' },
+    });
+  }
   if (err.code === '40P01' || err.code === '40001') {
     return res.status(409).json({
       data: null,
@@ -43,7 +49,8 @@ export function errorHandler(err, req, res, next) {
     });
   }
 
-  if (env.NODE_ENV !== 'test') console.error(err);
+  // Log del lado servidor (nunca se expone al cliente)
+  console.error(err);
   return res.status(500).json({
     data: null,
     meta: null,

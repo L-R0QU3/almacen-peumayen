@@ -18,6 +18,7 @@ import {
   updateQuotationController,
   changeStatusController,
   deleteQuotationController,
+  quotationPdfController,
 } from '../controllers/quotationController.js';
 
 const router = Router();
@@ -71,6 +72,15 @@ router.delete(
   requirePermission(PERMISSIONS.QUOTATIONS_DELETE),
   validate(idParamsSchema, 'params'),
   deleteQuotationController
+);
+
+router.get(
+  '/:id/pdf',
+  auth,
+  requireModule('quotations'),
+  requirePermission(PERMISSIONS.QUOTATIONS_EXPORT_PDF),
+  validate(idParamsSchema, 'params'),
+  quotationPdfController
 );
 
 export default router;

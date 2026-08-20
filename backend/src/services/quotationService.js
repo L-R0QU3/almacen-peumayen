@@ -83,7 +83,15 @@ export async function createQuotation({ customerId, validUntil, observations, it
     });
 
     for (const item of detail) {
-      await repo.createItem(client, { quotationId: quotation.id, ...item });
+      await repo.createItem(client, {
+        quotationId: quotation.id,
+        productId: item.product_id,
+        productName: item.product_name,
+        sku: item.sku,
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        subtotal: item.subtotal,
+      });
     }
 
     return { ...quotation, items: detail };
@@ -149,7 +157,15 @@ export async function updateQuotation(id, { customerId, validUntil, observations
     if (detail !== null) {
       await repo.deleteItems(client, id);
       for (const item of detail) {
-        await repo.createItem(client, { quotationId: id, ...item });
+        await repo.createItem(client, {
+          quotationId: id,
+          productId: item.product_id,
+          productName: item.product_name,
+          sku: item.sku,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          subtotal: item.subtotal,
+        });
       }
     }
 

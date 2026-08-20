@@ -9,35 +9,43 @@ export function formatCLP(value) {
   return clpFormatter.format(value ?? 0);
 }
 
-const dateFormatter = new Intl.DateTimeFormat('es-CL', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
+/** Parsea "YYYY-MM-DD" o "YYYY-MM-DDTHH:mm" como fecha LOCAL (evita corrimiento por zona horaria). */
+function parseLocalDate(value) {
+  if (value == null) return null;
+  if (value instanceof Date) return value;
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+  if (m) {
+    return new Date(
+      Number(m[1]),
+      Number(m[2]) - 1,
+      Number(m[3]),
+      m[4] ? Number(m[4]) : 0,
+      m[5] ? Number(m[5]) : 0
+    );
+  }
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
 
-const dateTimeFormatter = new Intl.DateTimeFormat('es-CL', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
+function pad(n) {
+  return String(n).padStart(2, '0');
+}
 
 /** DD/MM/YYYY */
 export function formatDate(value) {
-  if (!value) return '—';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return '—';
-  return dateFormatter.format(d);
+  const d = parseLocalDate(value);
+  if (!d) return '—';
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
+/** DD/MM/YYYY HH:mm (24h) */
 export function formatDateTime(value) {
-  if (!value) return '—';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return '—';
-  return dateTimeFormatter.format(d);
+  const d = parseLocalDate(value);
+  if (!d) return '—';
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }

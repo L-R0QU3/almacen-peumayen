@@ -107,7 +107,7 @@ export async function update(db, id, fields) {
 
 export async function deactivate(db, id) {
   const { rows } = await db.query(
-    `UPDATE public.products SET is_active = false, updated_at = now() WHERE id = $1 RETURNING id`,
+    `UPDATE public.products SET is_active = false, updated_at = now() WHERE id = $1 RETURNING *`,
     [id]
   );
   return rows[0] ?? null;

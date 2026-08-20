@@ -17,6 +17,9 @@ test-results/
 playwright-report/
 blob-report/
 
+# Fuentes extraídas en runtime (pdfmake)
+backend/fonts/
+
 # Logs
 *.log
 npm-debug.log*
