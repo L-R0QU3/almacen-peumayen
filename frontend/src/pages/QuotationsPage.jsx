@@ -143,6 +143,22 @@ export default function QuotationsPage() {
     }
   }
 
+  async function downloadPdf(q) {
+    try {
+      const res = await api.get(`/quotations/${q.id}/pdf`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${q.number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   const filteredProducts = products.filter(
     (p) =>
       !productQ ||
@@ -321,12 +337,13 @@ export default function QuotationsPage() {
                 </Button>
               </>
             ) : null}
+            <Button variant="secondary" onClick={() => downloadPdf(detail)}>
+              ⬇ PDF
+            </Button>
             {detail.status === 'BORRADOR' ? (
-              <>
-                <Button variant="danger" onClick={() => handleDelete(detail)}>
-                  Eliminar borrador
-                </Button>
-              </>
+              <Button variant="danger" onClick={() => handleDelete(detail)}>
+                Eliminar borrador
+              </Button>
             ) : null}
           </div>
         </Modal>
