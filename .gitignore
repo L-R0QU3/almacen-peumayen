@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+
+# Entorno
+.env
+.env.local
+.env.*.local
+
+# Builds
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

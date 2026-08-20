@@ -1,0 +1,87 @@
+/* ============================================================
+   Tokens de diseño — Almacén Peumayen
+   Modos: Light (default), Dark ([data-theme="dark"]), System (JS)
+   ============================================================ */
+
+:root {
+  /* Colores base */
+  --color-bg: #f3f5f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef1f4;
+  --color-text: #171a1f;
+  --color-text-muted: #64707d;
+  --color-border: #e1e6eb;
+
+  /* Marca */
+  --color-primary: #16a34a;
+  --color-primary-hover: #15803d;
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #dcfce7;
+
+  /* Semánticos */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fee2e2;
+  --color-info: #2563eb;
+  --color-info-soft: #dbeafe;
+
+  /* Radios */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  /* Espaciado */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Tipografía */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.14);
+
+  /* Layout */
+  --header-h: 56px;
+  --bottom-nav-h: 60px;
+  --sidebar-w: 240px;
+}
+
+[data-theme='dark'] {
+  --color-bg: #0e1116;
+  --color-surface: #171b22;
+  --color-surface-2: #20262f;
+  --color-text: #e6eaf0;
+  --color-text-muted: #96a0ad;
+  --color-border: #2a313c;
+
+  --color-primary: #22c55e;
+  --color-primary-hover: #16a34a;
+  --color-on-primary: #0b1220;
+  --color-primary-soft: #14532d;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-warning-soft: #422006;
+  --color-danger: #ef4444;
+  --color-danger-soft: #450a0a;
+  --color-info: #3b82f6;
+  --color-info-soft: #172554;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.6);
+}

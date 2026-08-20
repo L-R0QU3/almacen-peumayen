@@ -1,0 +1,15 @@
+{
+  "name": "@peumayen/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "node-pg-migrate -m migrations -d DATABASE_URL up",
+    "migrate:down": "node-pg-migrate -m migrations -d DATABASE_URL down",
+    "migrate:create": "node-pg-migrate -m migrations create"
+  },
+  "dependencies": {
+    "node-pg-migrate": "^7.9.1",
+    "pg": "^8.13.1"
+  }
+}
