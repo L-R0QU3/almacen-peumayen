@@ -14,7 +14,17 @@ const router = Router();
 // Login con rate limit específico (10 intentos/minuto por IP)
 router.post(
   '/login',
-  rateLimit({ windowMs: 60_000, max: 10, standardHeaders: true, legacyHeaders: false }),
+  rateLimit({
+    windowMs: 60_000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      data: null,
+      meta: null,
+      error: { code: 'RATE_LIMITED', message: 'Demasiados intentos de inicio de sesión. Intente más tarde.' },
+    },
+  }),
   validate(loginSchema),
   loginController
 );

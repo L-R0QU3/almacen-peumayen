@@ -34,6 +34,7 @@ export default function InventoryPage() {
   const [adjustTarget, setAdjustTarget] = useState(null);
   const [adjustForm, setAdjustForm] = useState({ new_stock: 0, notes: '' });
   const [history, setHistory] = useState(null);
+  const [mobileDetail, setMobileDetail] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -180,7 +181,7 @@ export default function InventoryPage() {
 
             <div className="d-none-desktop">
               {rows.map((p) => (
-                <div key={p.id} className="list-item">
+                <div key={p.id} className="list-item" role="button" onClick={() => setMobileDetail(p)}>
                   <div>
                     <strong>{p.name}</strong>
                     <div className="small muted mono">
@@ -189,9 +190,7 @@ export default function InventoryPage() {
                   </div>
                   <div className="row">
                     {p.is_low ? <span className="badge badge-warning">Bajo</span> : null}
-                    <Button variant="ghost" className="btn-sm" onClick={() => openHistory(p)}>
-                      ▸
-                    </Button>
+                    <span className="muted">▸</span>
                   </div>
                 </div>
               ))}
@@ -287,6 +286,54 @@ export default function InventoryPage() {
               </div>
             ))
           )}
+        </Modal>
+      ) : null}
+
+      {mobileDetail ? (
+        <Modal title={mobileDetail.name} onClose={() => setMobileDetail(null)}>
+          <div className="row between mb-4">
+            <div>
+              <div className="mono small muted">{mobileDetail.sku}</div>
+              <div className="mono">
+                Stock: <strong>{mobileDetail.stock}</strong> {mobileDetail.unit_abbreviation} · mín {mobileDetail.min_stock}
+              </div>
+            </div>
+            {mobileDetail.is_low ? <span className="badge badge-warning">Bajo</span> : null}
+          </div>
+          <div className="row wrap" style={{ gap: 'var(--space-3)' }}>
+            <Button
+              variant="secondary"
+              className="grow"
+              onClick={() => {
+                setMovementTarget(mobileDetail);
+                setMovementForm({ movement_type: 'PURCHASE', quantity: 1, notes: '' });
+                setMobileDetail(null);
+              }}
+            >
+              + Movimiento
+            </Button>
+            <Button
+              variant="secondary"
+              className="grow"
+              onClick={() => {
+                setAdjustTarget(mobileDetail);
+                setAdjustForm({ new_stock: mobileDetail.stock, notes: '' });
+                setMobileDetail(null);
+              }}
+            >
+              Ajustar
+            </Button>
+            <Button
+              variant="ghost"
+              className="grow"
+              onClick={() => {
+                setMobileDetail(null);
+                openHistory(mobileDetail);
+              }}
+            >
+              Historial
+            </Button>
+          </div>
         </Modal>
       ) : null}
     </div>

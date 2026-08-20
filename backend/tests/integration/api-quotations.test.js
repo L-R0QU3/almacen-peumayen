@@ -30,8 +30,9 @@ describe('Cotizaciones', () => {
       );
 
     expect(res.status).toBe(201);
-    const year = new Date().getFullYear();
-    expect(res.body.data.number).toBe(`COT-${year}-0001`);
+    // Formato COT-YYYY-NNNN (la secuencia la garantiza quotation_sequences; el número
+    // absoluto depende del orden de ejecución de la suite)
+    expect(res.body.data.number).toMatch(/^COT-\d{4}-\d{4}$/);
     expect(res.body.data.status).toBe('BORRADOR');
     expect(res.body.data.subtotal).toBe(4000);
     expect(res.body.data.total).toBe(4000);

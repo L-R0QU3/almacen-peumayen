@@ -49,6 +49,24 @@ export function errorHandler(err, req, res, next) {
     });
   }
 
+  // Payload demasiado grande (express.json limit)
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({
+      data: null,
+      meta: null,
+      error: { code: 'PAYLOAD_TOO_LARGE', message: 'El cuerpo de la solicitud excede el límite permitido' },
+    });
+  }
+
+  // JSON mal formado
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      data: null,
+      meta: null,
+      error: { code: 'INVALID_JSON', message: 'El cuerpo de la solicitud no es JSON válido' },
+    });
+  }
+
   // Log del lado servidor (nunca se expone al cliente)
   console.error(err);
   return res.status(500).json({
