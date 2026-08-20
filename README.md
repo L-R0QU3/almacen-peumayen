@@ -124,6 +124,15 @@ npm run seed-demo
 - Integración API: Supertest contra PostgreSQL real (`npm test` en `backend/`; prepara y migra `peumayen_test` automáticamente)
 - E2E: Playwright (única herramienta E2E) — `npm test` en `e2e/` (requiere `npm run build` previo en `frontend/`)
 
+## Estado actual
+
+El MVP está **implementado y verificado de punta a punta**:
+
+- **Base de datos**: migraciones 1–17 aplicadas en Supabase (PostgreSQL 17.6).
+- **Supabase conectado**: Auth (login/logout reales verificados), Storage (`company-assets` + políticas RLS de ADMIN), DB (numeración atómica `COT-2026-0001` verificada en producción).
+- **Testing**: backend 71/71 (unit + integración + concurrencia + seguridad), frontend 16/16, E2E Playwright 12/12 (incluye login real y flujo de negocio completo por la UI), cobertura ~80%.
+- **Despliegue**: ver [`docs/DEPLOY.md`](docs/DEPLOY.md) (GitHub + Render + Vercel paso a paso).
+
 ## Roadmap (estimación flexible)
 
 Ver sección 24 de la arquitectura. Prioridad: integridad de datos → seguridad → calidad → UX → funcionalidad → tiempo.
