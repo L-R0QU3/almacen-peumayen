@@ -13,7 +13,8 @@
     "test": "node scripts/prepare-test-db.mjs && vitest run",
     "coverage": "node scripts/prepare-test-db.mjs && vitest run --coverage",
     "create-admin": "node scripts/create-admin.mjs",
-    "seed-demo": "node scripts/seed-demo.mjs"
+    "seed-demo": "node scripts/seed-demo.mjs",
+    "clean-e2e": "node scripts/clean-e2e.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
