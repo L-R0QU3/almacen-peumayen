@@ -6,13 +6,14 @@ export default defineConfig({
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:4173',
+    // 5173 coincide con FRONTEND_URL del backend (CORS)
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',
     trace: 'on-first-retry',
     locale: 'es-CL',
   },
   webServer: {
-    command: 'npm run preview -- --port 4173',
-    url: 'http://localhost:4173',
+    command: 'npm run preview -- --port 5173',
+    url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
     cwd: '../frontend',
