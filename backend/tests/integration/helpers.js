@@ -28,6 +28,17 @@ vi.mock('../../src/lib/supabase.js', () => {
           }
           return { data: { user: { id: userId, email: 'test@peumayen.cl' } }, error: null };
         }),
+        signInWithPassword: vi.fn(async () => ({
+          data: {
+            user: { id: '00000000-0000-0000-0000-000000000001' },
+            session: {
+              access_token: 'jwt-test',
+              refresh_token: 'refresh-test',
+              expires_in: 3600,
+            },
+          },
+          error: null,
+        })),
       },
     },
     supabaseAdmin: {

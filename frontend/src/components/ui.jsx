@@ -1,3 +1,5 @@
+import React, { useId } from 'react';
+
 export function Button({ variant = 'primary', className = '', ...props }) {
   return <button className={`btn btn-${variant} ${className}`} {...props} />;
 }
@@ -19,10 +21,12 @@ export function Textarea(props) {
 }
 
 export function Field({ label, error, children }) {
+  const id = useId();
+  const child = React.isValidElement(children) ? React.cloneElement(children, { id }) : children;
   return (
     <div className="field">
-      <label>{label}</label>
-      {children}
+      <label htmlFor={id}>{label}</label>
+      {child}
       {error ? <span className="field-error">{error}</span> : null}
     </div>
   );

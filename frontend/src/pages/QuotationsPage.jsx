@@ -159,6 +159,77 @@ export default function QuotationsPage() {
     }
   }
 
+  function escapeHtml(s) {
+    return String(s ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
+  }
+
+  /** Vista imprimible: abre una ventana con el detalle y ejecuta window.print(). */
+  async function printQuotation(q) {
+    const w = window.open('', '_blank', 'width=800,height=640');
+    if (!w) return;
+    try {
+      const cfg = await api.get('/config');
+      const businessName = cfg.data.business?.name || 'Almacén Peumayen';
+      const rows = q.items
+        .map(
+          (it) => `<tr>
+            <td class="mono">${escapeHtml(it.sku)}</td>
+            <td>${escapeHtml(it.product_name)}</td>
+            <td class="right">${it.quantity}</td>
+            <td class="right">${formatCLP(it.unit_price)}</td>
+            <td class="right mono"><strong>${formatCLP(it.subtotal)}</strong></td>
+          </tr>`
+        )
+        .join('');
+      w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8" />
+        <title>${escapeHtml(q.number)}</title>
+        <style>
+          body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: #171a1f; max-width: 720px; margin: 32px auto; padding: 0 16px; }
+          .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #e1e6eb; padding-bottom: 12px; }
+          .brand { font-size: 20px; font-weight: 800; color: #15803d; margin: 0; }
+          .number { font-size: 17px; font-weight: 700; text-align: right; }
+          .muted { color: #64707d; font-size: 12px; }
+          .meta { display: flex; gap: 32px; margin: 14px 0; font-size: 13px; }
+          .meta b { display: block; color: #64707d; font-size: 11px; text-transform: uppercase; }
+          table { width: 100%; border-collapse: collapse; font-size: 13px; }
+          th { text-align: left; color: #64707d; text-transform: uppercase; font-size: 11px; padding: 6px; border-bottom: 1px solid #e1e6eb; }
+          td { padding: 6px; border-bottom: 1px solid #eef1f4; }
+          .right { text-align: right; }
+          .mono { font-variant-numeric: tabular-nums; }
+          .total { display: flex; justify-content: flex-end; margin-top: 12px; font-size: 16px; font-weight: 700; }
+          .obs { margin-top: 18px; font-size: 12px; }
+          @media print { body { margin: 0; } }
+        </style></head><body>
+        <div class="head">
+          <div><h1 class="brand">${escapeHtml(businessName)}</h1><div class="muted">COTIZACIÓN</div></div>
+          <div><div class="number">${escapeHtml(q.number)}</div>
+          <div class="muted">${escapeHtml(q.status.replaceAll('_', ' '))}</div></div>
+        </div>
+        <div class="meta">
+          <div><b>Cliente</b>${escapeHtml(q.customer_name || 'Sin cliente')}</div>
+          <div><b>Emisión</b>${formatDate(q.issue_date)}</div>
+          <div><b>Vigencia</b>${formatDate(q.valid_until)}</div>
+        </div>
+        <table>
+          <thead><tr><th>SKU</th><th>Producto</th><th class="right">Cant.</th><th class="right">Precio unit.</th><th class="right">Subtotal</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="total">Total: ${formatCLP(q.total)}</div>
+        ${q.observations ? `<div class="obs"><b>Observaciones:</b> ${escapeHtml(q.observations)}</div>` : ''}
+        </body></html>`);
+      w.document.close();
+      w.focus();
+      w.print();
+    } catch (err) {
+      setError(err.message);
+      w.close();
+    }
+  }
+
   const filteredProducts = products.filter(
     (p) =>
       !productQ ||
@@ -339,6 +410,9 @@ export default function QuotationsPage() {
             ) : null}
             <Button variant="secondary" onClick={() => downloadPdf(detail)}>
               ⬇ PDF
+            </Button>
+            <Button variant="secondary" onClick={() => printQuotation(detail)}>
+              🖨 Imprimir
             </Button>
             {detail.status === 'BORRADOR' ? (
               <Button variant="danger" onClick={() => handleDelete(detail)}>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { api, setupIntegration, auth, TOKEN_ADMIN, TOKEN_NOBODY, TOKEN_INVALID } from './helpers.js';
+import { api, setupIntegration, auth, TOKEN_ADMIN, TOKEN_NOBODY, TOKEN_INVALID, TEST_ADMIN_ID } from './helpers.js';
 
 setupIntegration();
 
@@ -48,6 +48,27 @@ describe('Core de la API', () => {
     const res = await api().post('/api/v1/auth/login').send({ email: 'no-es-email', password: '123' });
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('POST /auth/login devuelve sesión + contexto (flujo Supabase)', async () => {
+    const res = await api().post('/api/v1/auth/login').send({ email: 'admin@test.cl', password: '123456' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.access_token).toBe('jwt-test');
+    expect(res.body.data.refresh_token).toBe('refresh-test');
+    expect(res.body.data.user.id).toBe(TEST_ADMIN_ID);
+    expect(res.body.data.user.role).toBe('ADMIN');
+    expect(res.body.data.user.permissions).toContain('quotations.create');
+  });
+
+  it('POST /auth/login con credenciales inválidas → 401', async () => {
+    const { supabase } = await import('../../src/lib/supabase.js');
+    supabase.auth.signInWithPassword.mockResolvedValueOnce({
+      data: { user: null, session: null },
+      error: { message: 'Invalid login credentials' },
+    });
+    const res = await api().post('/api/v1/auth/login').send({ email: 'admin@test.cl', password: 'mal-clave' });
+    expect(res.status).toBe(401);
+    expect(res.body.error.message).toContain('Credenciales incorrectas');
   });
 });
 
