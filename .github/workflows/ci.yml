@@ -63,6 +63,9 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
+      - name: Instalar dependencias de migraciones (database)
+        working-directory: database
+        run: npm ci
       - run: npm run lint
       - name: Tests (unit + integración contra PostgreSQL)
         env:
