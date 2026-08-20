@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { api, setupIntegration, auth, TOKEN_ADMIN, createProduct } from './helpers.js';
 
 setupIntegration();
@@ -33,13 +33,14 @@ describe('Inventario transaccional', () => {
   it('bloquea stock insuficiente (409 STOCK_INSUFFICIENT) sin tocar el stock', async () => {
     const { res } = await createProduct();
     const productId = res.body.data.id;
+    const sku = res.body.data.sku;
 
     const fail = await api().post('/api/v1/inventory/movements').set(auth(TOKEN_ADMIN))
       .send({ product_id: productId, movement_type: 'ADJUSTMENT_OUT', quantity: 99 });
     expect(fail.status).toBe(409);
     expect(fail.body.error.code).toBe('STOCK_INSUFFICIENT');
 
-    const list = await api().get('/api/v1/inventory').set(auth(TOKEN_ADMIN));
+    const list = await api().get(`/api/v1/inventory?q=${sku}&per_page=100`).set(auth(TOKEN_ADMIN));
     const p = list.body.data.find((x) => x.id === productId);
     expect(p.stock).toBe(0); // la transacción hizo ROLLBACK
   });
@@ -96,10 +97,11 @@ describe('Inventario transaccional', () => {
   it('lista stock con alertas (is_low)', async () => {
     const { res } = await createProduct({ min_stock: 5 });
     const productId = res.body.data.id;
+    const sku = res.body.data.sku;
     await api().post('/api/v1/inventory/movements').set(auth(TOKEN_ADMIN))
       .send({ product_id: productId, movement_type: 'PURCHASE', quantity: 2 });
 
-    const alerts = await api().get('/api/v1/inventory?only_alerts=true').set(auth(TOKEN_ADMIN));
+    const alerts = await api().get(`/api/v1/inventory?only_alerts=true&q=${sku}&per_page=100`).set(auth(TOKEN_ADMIN));
     expect(alerts.status).toBe(200);
     const p = alerts.body.data.find((x) => x.id === productId);
     expect(p.is_low).toBe(true);

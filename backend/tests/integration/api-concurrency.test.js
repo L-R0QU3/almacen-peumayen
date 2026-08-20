@@ -13,6 +13,7 @@ describe('Concurrencia', () => {
   it('dos movimientos paralelos no pierden stock (FOR UPDATE)', async () => {
     const { res } = await createProduct();
     const productId = res.body.data.id;
+    const sku = res.body.data.sku;
 
     const results = await Promise.all([
       api().post('/api/v1/inventory/movements').set(auth(TOKEN_ADMIN))
@@ -23,7 +24,7 @@ describe('Concurrencia', () => {
 
     expect(results.every((r) => r.status === 201)).toBe(true);
 
-    const list = await api().get('/api/v1/inventory').set(auth(TOKEN_ADMIN));
+    const list = await api().get(`/api/v1/inventory?q=${sku}&per_page=100`).set(auth(TOKEN_ADMIN));
     const p = list.body.data.find((x) => x.id === productId);
     expect(p.stock).toBe(15); // 10 + 5, sin carreras
 
@@ -35,6 +36,7 @@ describe('Concurrencia', () => {
   it('salidas paralelas respetan el límite de stock (sin negativos)', async () => {
     const { res } = await createProduct();
     const productId = res.body.data.id;
+    const sku = res.body.data.sku;
     await api().post('/api/v1/inventory/movements').set(auth(TOKEN_ADMIN))
       .send({ product_id: productId, movement_type: 'PURCHASE', quantity: 10 });
 
@@ -53,7 +55,7 @@ describe('Concurrencia', () => {
     expect(ok).toBe(2);
     expect(blocked).toBe(1);
 
-    const list = await api().get('/api/v1/inventory').set(auth(TOKEN_ADMIN));
+    const list = await api().get(`/api/v1/inventory?q=${sku}&per_page=100`).set(auth(TOKEN_ADMIN));
     const p = list.body.data.find((x) => x.id === productId);
     expect(p.stock).toBe(2); // nunca negativo
   });

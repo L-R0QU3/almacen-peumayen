@@ -23,10 +23,10 @@ export default function CustomersPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await api.get('/customers', { params: { q: q || undefined, per_page: 50 } });
+      const res = await api.get('/customers', { params: { q: q || undefined, page, per_page: 50 } });
       setRows(res.data);
       setMeta(res.meta);
       setError('');
@@ -69,7 +69,7 @@ export default function CustomersPage() {
         await api.put(`/customers/${editing.id}`, payload);
       }
       setEditing(null);
-      await load();
+      await load(meta?.page || 1);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -81,7 +81,7 @@ export default function CustomersPage() {
     if (!window.confirm(`¿Desactivar al cliente "${c.name}"?`)) return;
     try {
       await api.delete(`/customers/${c.id}`);
-      await load();
+      await load(meta?.page || 1);
     } catch (err) {
       setError(err.message);
     }
@@ -150,7 +150,29 @@ export default function CustomersPage() {
             </div>
           </>
         )}
-        {meta && meta.total_pages > 1 ? <p className="small muted mt-4">{meta.total} clientes</p> : null}
+        {meta && meta.total_pages > 1 ? (
+          <div className="row between mt-4">
+            <Button
+              variant="secondary"
+              className="btn-sm"
+              disabled={meta.page <= 1}
+              onClick={() => load(meta.page - 1)}
+            >
+              ← Anterior
+            </Button>
+            <span className="small muted">
+              Página {meta.page} de {meta.total_pages} · {meta.total} clientes
+            </span>
+            <Button
+              variant="secondary"
+              className="btn-sm"
+              disabled={meta.page >= meta.total_pages}
+              onClick={() => load(meta.page + 1)}
+            >
+              Siguiente →
+            </Button>
+          </div>
+        ) : null}
       </Card>
 
       {editing ? (

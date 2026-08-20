@@ -34,11 +34,11 @@ export default function QuotationsPage() {
   });
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const res = await api.get('/quotations', {
-        params: { status: status || undefined, per_page: 25 },
+        params: { status: status || undefined, page, per_page: 25 },
       });
       setRows(res.data);
       setMeta(res.meta);
@@ -113,7 +113,7 @@ export default function QuotationsPage() {
         items: quoteForm.items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
       });
       setCreating(false);
-      await load();
+      await load(1);
       setDetail(created.data);
     } catch (err) {
       setError(err.message);
@@ -126,7 +126,7 @@ export default function QuotationsPage() {
     try {
       await api.post(`/quotations/${q.id}/status`, { status: next });
       setDetail(null);
-      await load();
+      await load(meta?.page || 1);
     } catch (err) {
       setError(err.message);
     }
@@ -137,7 +137,7 @@ export default function QuotationsPage() {
     try {
       await api.delete(`/quotations/${q.id}`);
       setDetail(null);
-      await load();
+      await load(meta?.page || 1);
     } catch (err) {
       setError(err.message);
     }
@@ -280,7 +280,29 @@ export default function QuotationsPage() {
             </div>
           ))
         )}
-        {meta && meta.total_pages > 1 ? <p className="small muted mt-4">{meta.total} cotizaciones</p> : null}
+        {meta && meta.total_pages > 1 ? (
+          <div className="row between mt-4">
+            <Button
+              variant="secondary"
+              className="btn-sm"
+              disabled={meta.page <= 1}
+              onClick={() => load(meta.page - 1)}
+            >
+              ← Anterior
+            </Button>
+            <span className="small muted">
+              Página {meta.page} de {meta.total_pages} · {meta.total} cotizaciones
+            </span>
+            <Button
+              variant="secondary"
+              className="btn-sm"
+              disabled={meta.page >= meta.total_pages}
+              onClick={() => load(meta.page + 1)}
+            >
+              Siguiente →
+            </Button>
+          </div>
+        ) : null}
       </Card>
 
       {creating ? (
