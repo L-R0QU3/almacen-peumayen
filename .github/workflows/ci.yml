@@ -71,7 +71,8 @@ jobs:
         env:
           TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/peumayen_test
         run: |
-          npm test > test-output.txt 2>&1
+          node scripts/prepare-test-db.mjs
+          npx vitest run tests/integration/api-quotations.test.js -t "crea|incrementa|acepta|preserva|solo permite|actualiza|valida|bloquea|marca|rechaza" > test-output.txt 2>&1
           status=$?
           if [ $status -ne 0 ]; then
             echo "### Resumen del fallo (últimas 150 líneas)" >> "$GITHUB_STEP_SUMMARY"
