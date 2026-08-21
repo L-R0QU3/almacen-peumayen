@@ -1,48 +1,34 @@
 import { createRequire } from 'node:module';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 
 // Fuentes Roboto incluidas en pdfmake (base64 en vfs_fonts.js)
-const vfs = require('pdfmake/build/vfs_fonts.js');
-
-const FONT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../fonts');
-const FONT_FILES = {
-  'Roboto-Regular.ttf': 'normal',
-  'Roboto-Medium.ttf': 'bold', // pdfmake usa Medium como "bold"
-  'Roboto-Italic.ttf': 'italics',
-  'Roboto-MediumItalic.ttf': 'bolditalics',
-};
+const vfsFonts = require('pdfmake/build/vfs_fonts.js');
 
 // pdfmake (servidor): instancia oficial con políticas de acceso restringidas
 const pdfmake = require('pdfmake');
+
+// Patrón oficial pdfmake 0.3: fuentes registradas en el virtual file system
+// (en memoria, sin leer disco) → idéntico en cualquier plataforma (Linux/Windows).
+for (const [file, b64] of Object.entries(vfsFonts)) {
+  pdfmake.virtualfs.storage[file] = Buffer.from(b64, 'base64');
+}
+
+pdfmake.addFonts({
+  Roboto: {
+    normal: 'Roboto-Regular.ttf',
+    bold: 'Roboto-Medium.ttf', // pdfmake usa Medium como "bold"
+    italics: 'Roboto-Italic.ttf',
+    bolditalics: 'Roboto-MediumItalic.ttf',
+  },
+});
+
 if (typeof pdfmake.setLocalAccessPolicy === 'function') {
-  // solo se permite leer las fuentes propias (nada más del sistema de archivos)
-  pdfmake.setLocalAccessPolicy((filePath) => filePath.startsWith(FONT_DIR));
+  pdfmake.setLocalAccessPolicy(() => false); // sin acceso a archivos locales
 }
 if (typeof pdfmake.setUrlAccessPolicy === 'function') {
   pdfmake.setUrlAccessPolicy(() => false); // sin descargas externas
 }
-
-// Extrae las fuentes a disco la primera vez (el printer de servidor las lee por ruta)
-for (const file of Object.keys(FONT_FILES)) {
-  const target = path.join(FONT_DIR, file);
-  if (!existsSync(target)) {
-    if (!existsSync(FONT_DIR)) mkdirSync(FONT_DIR, { recursive: true });
-    const b64 = vfs[file];
-    if (!b64) throw new Error(`Fuente no encontrada en vfs: ${file}`);
-    writeFileSync(target, Buffer.from(b64, 'base64'));
-  }
-}
-
-// Registra las fuentes en la instancia pdfmake
-pdfmake.addFonts?.({
-  Roboto: Object.fromEntries(
-    Object.entries(FONT_FILES).map(([file, style]) => [style, path.join(FONT_DIR, file)])
-  ),
-});
 
 const clp = new Intl.NumberFormat('es-CL', {
   style: 'currency',
