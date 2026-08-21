@@ -4,17 +4,14 @@
  * para localizar el 28P01 (password auth failed) que solo ocurre en CI/Linux.
  */
 import pg from 'pg';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 console.log('TEST_DATABASE_URL=', process.env.TEST_DATABASE_URL);
 console.log('DATABASE_URL=', process.env.DATABASE_URL);
 console.log('PG_USER_ENV=', process.env.PGUSER || '(sin PGUSER)');
-
-try {
-  const pkg = await import('pg/package.json', { with: { type: 'json' } });
-  console.log('pg version=', pkg.default?.version ?? pkg.version);
-} catch {
-  console.log('pg version=?(no legible)');
-}
+console.log('pg version=', require('pg/package.json').version);
 
 const url = process.env.DATABASE_URL || process.env.TEST_DATABASE_URL;
 if (!url) {
