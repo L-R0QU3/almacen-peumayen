@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Permisos del GITHUB_TOKEN: solo lo necesario (público del detalle de fallos)
+permissions:
+  contents: read
+  statuses: write
+
 jobs:
   database:
     name: Migraciones (PostgreSQL)
