@@ -1,0 +1,14 @@
+{
+  "name": "almacen-peumayen",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "description": "Monorepo Almacén Peumayen. El backend vive en backend/; este package.json raíz permite desplegar la API en plataformas que ejecutan desde la raíz (Render sin root directory).",
+  "scripts": {
+    "start": "npm start --prefix backend",
+    "build": "npm install --omit=dev --prefix backend",
+    "postinstall": "npm install --omit=dev --prefix backend"
+  }
+}

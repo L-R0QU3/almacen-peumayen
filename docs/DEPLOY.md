@@ -37,15 +37,20 @@ git push -u origin main
 (raíz del repo) y crea el servicio `peumayen-api` con root `backend`, build
 `npm install --omit=dev`, start `npm start` y healthcheck `/api/v1/health`.
 
-**Opción B — Manual**: New → Web Service → repo → root `backend` →
-Build `npm install --omit=dev` → Start `npm start` → Health Check Path `/api/v1/health`.
+**Opción B — Manual**: New → Web Service → repo → **Root Directory `backend`** (IMPORTANTE:
+sin esto Render corre en la raíz del repo, donde no hay `package.json` y el deploy
+falla con ENOENT) → Build `npm install --omit=dev` → Start `npm start` →
+Health Check Path `/api/v1/health`.
+
+> Si por algún motivo el servicio queda con root en la raíz del repo, ya funciona igual:
+> el `package.json` raíz delega (`start`/`build`/`postinstall` → `backend/`).
 
 **Variables de entorno** (Settings → Environment):
 
 | Variable | Valor |
 |---|---|
 | `NODE_ENV` | `production` |
-| `PORT` | `4000` (Render la inyecta automáticamente si se deja vacía) |
+| `PORT` | **dejar vacía** — Render la inyecta automáticamente |
 | `DATABASE_URL` | `postgresql://postgres.rzlboctwmlnaszbhnywz:<password-del-pooler>@aws-0-us-east-1.pooler.supabase.com:5432/postgres` |
 | `SUPABASE_URL` | `https://rzlboctwmlnaszbhnywz.supabase.co` |
 | `SUPABASE_ANON_KEY` | *(anon key del proyecto)* |
@@ -54,7 +59,8 @@ Build `npm install --omit=dev` → Start `npm start` → Health Check Path `/api
 | `RATE_LIMIT_MAX` | `300` |
 
 > **Importante**: `FRONTEND_URL` debe ser la URL exacta de Vercel (sin `/` final).
-> CORS solo permite ese origen.
+> CORS solo permite ese origen. Sin estas variables el backend no arranca
+> (validación de entorno al boot).
 
 ---
 

@@ -12,8 +12,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 4000
+      # PORT lo inyecta Render automáticamente (no fijarlo)
       - key: DATABASE_URL
         sync: false
       - key: SUPABASE_URL
