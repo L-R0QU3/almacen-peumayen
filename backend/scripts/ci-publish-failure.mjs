@@ -10,18 +10,24 @@ const file = 'test-output.txt';
 const text = existsSync(file) ? readFileSync(file, 'utf8') : '(sin salida de tests)';
 
 const errorLines = [];
+const diagLines = [];
 for (const line of text.split('\n')) {
   const m = line.match(/^::error[^:]*::(.*)$/);
   if (m) {
     errorLines.push(`ERR: ${m[1]}`);
     continue;
   }
+  if (/TEST_DATABASE_URL=|DATABASE_URL=|CONNECT (OK|FAIL)|pg version=|PG_USER_ENV=/.test(line)) {
+    diagLines.push(line.trim());
+  }
   if (/FAIL|AssertionError|Cannot read|TypeError:|Error:|expected \d+|×|✗|Tests\s+\d+\s+failed|STDERR/.test(line)) {
     errorLines.push(line.trim());
   }
 }
 
-let full = errorLines.slice(-12).join('\n') || text.split('\n').filter(Boolean).slice(-5).join('\n');
+// Prioridad: diagnóstico de conexión primero, luego errores
+let full = [...diagLines.slice(-4), ...errorLines.slice(-12)].join('\n');
+if (!full.trim()) full = text.split('\n').filter(Boolean).slice(-5).join('\n');
 full = full.replace(/\r/g, '');
 
 const chunks = [];
