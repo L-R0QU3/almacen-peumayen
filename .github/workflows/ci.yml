@@ -78,6 +78,12 @@ jobs:
             tail -n 150 test-output.txt >> "$GITHUB_STEP_SUMMARY"
           fi
           exit $status
+      - name: Publicar detalle del fallo (commit status)
+        if: failure()
+        working-directory: backend
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/ci-publish-failure.mjs
 
   frontend:
     name: Frontend (build + test)
